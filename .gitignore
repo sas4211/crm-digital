@@ -1,0 +1,12 @@
+output/
+.env
+*.mp3
+*.mp4
+*.pdf
+__pycache__/
+node_modules/
+.notebooklm/
+*.pyc
+.DS_Store
+dist/
+.next/
