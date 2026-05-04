@@ -4,9 +4,9 @@
   "private": true,
   "description": "CRM Digital — AI-powered customer success platform",
   "scripts": {
-    "dev": "concurrently \"next dev\" \"python -m uvicorn src.api.main:app --reload --port 8000\"",
+    "dev": "concurrently \"next dev\" \"python -m uvicorn api.index:app --reload --port 8000\"",
     "dev:frontend": "next dev",
-    "dev:backend": "python -m uvicorn src.api.main:app --reload --port 8000",
+    "dev:backend": "python -m uvicorn api.index:app --reload --port 8000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

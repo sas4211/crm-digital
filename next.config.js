@@ -1,13 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {
-    return [
-      { source: "/api/tickets/:path*",   destination: "http://localhost:8000/tickets/:path*"   },
-      { source: "/api/customers/:path*", destination: "http://localhost:8000/customers/:path*" },
-      { source: "/api/reports/:path*",   destination: "http://localhost:8000/reports/:path*"   },
-      { source: "/api/health",           destination: "http://localhost:8000/health"            },
-      { source: "/api/webhooks/:path*",  destination: "http://localhost:8000/webhooks/:path*"  },
-    ];
+    // In local development, we proxy /api to the FastAPI server on port 8000.
+    // On Vercel (production), the /api directory is automatically served 
+    // as serverless functions, so no rewrites are needed.
+    if (process.env.NODE_ENV === "development") {
+      return [
+        {
+          source: "/api/:path*",
+          destination: "http://localhost:8000/:path*",
+        },
+      ];
+    }
+    return [];
   },
 };
 
