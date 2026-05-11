@@ -9,6 +9,10 @@ from sqlalchemy.exc import SQLAlchemyError
 
 DEFAULT_SQLITE_URL = "sqlite+aiosqlite:///./crm_digital.db"
 DATABASE_URL = os.environ.get("DATABASE_URL", DEFAULT_SQLITE_URL)
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 def get_engine(url):
     return create_async_engine(url, echo=False, pool_pre_ping=True)
