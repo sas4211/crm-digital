@@ -14,7 +14,7 @@ import os
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import Depends, FastAPI, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, FastAPI, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -44,17 +44,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+router = APIRouter(prefix="/api")
+
 
 # ── Health ─────────────────────────────────────────────────────────────────────
 
-@app.get("/health")
+@router.get("/health")
 async def health():
     return {"status": "ok", "agent": "alex", "model": "gemini-1.5-pro"}
 
 
 # ── Gmail webhook ──────────────────────────────────────────────────────────────
 
-@app.post("/webhooks/gmail")
+@router.post("/webhooks/gmail")
 async def gmail_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     payload = await request.json()
     notification = parse_pubsub_webhook(payload)
@@ -90,7 +92,7 @@ async def gmail_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
 # ── WhatsApp webhook ───────────────────────────────────────────────────────────
 
-@app.post("/webhooks/whatsapp")
+@router.post("/webhooks/whatsapp")
 async def whatsapp_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     form = await request.form()
     msg = parse_twilio_webhook(dict(form))
@@ -114,7 +116,7 @@ async def whatsapp_webhook(request: Request, db: AsyncSession = Depends(get_db))
 
 # ── Web form endpoint ──────────────────────────────────────────────────────────
 
-@app.post("/webhooks/web-form")
+@router.post("/webhooks/web-form")
 async def web_form_submit(
     submission: WebFormSubmission,
     db: AsyncSession = Depends(get_db),
@@ -139,7 +141,7 @@ async def web_form_submit(
 
 # ── Internal: list tickets ─────────────────────────────────────────────────────
 
-@app.get("/tickets")
+@router.get("/tickets")
 async def list_tickets(
     status: str = "",
     channel: str = "",
@@ -171,7 +173,7 @@ async def list_tickets(
 
 # ── Customers ─────────────────────────────────────────────────────────────────
 
-@app.get("/customers")
+@router.get("/customers")
 async def list_customers(limit: int = 100, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Customer).order_by(Customer.created_at.desc()).limit(limit))
     customers = result.scalars().all()
@@ -199,7 +201,10 @@ async def list_customers(limit: int = 100, db: AsyncSession = Depends(get_db)):
 
 # ── Daily report ───────────────────────────────────────────────────────────────
 
-@app.get("/reports/daily")
+@router.get("/reports/daily")
 async def daily_report(db: AsyncSession = Depends(get_db)):
     report = await generate_daily_report(db)
     return report
+
+
+app.include_router(router)

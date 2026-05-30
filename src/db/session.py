@@ -7,7 +7,11 @@ import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.exc import SQLAlchemyError
 
-DEFAULT_SQLITE_URL = "sqlite+aiosqlite:///./crm_digital.db"
+if os.environ.get("VERCEL"):
+    DEFAULT_SQLITE_URL = "sqlite+aiosqlite:////tmp/crm_digital.db"
+else:
+    DEFAULT_SQLITE_URL = "sqlite+aiosqlite:///./crm_digital.db"
+
 DATABASE_URL = os.environ.get("DATABASE_URL", DEFAULT_SQLITE_URL)
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
